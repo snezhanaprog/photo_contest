@@ -27,9 +27,9 @@ class Photo(models.Model):
 
     count_comments = models.IntegerField(default=0)
     count_voices = models.IntegerField(default=0)
-    date_publicated = models.DateTimeField(auto_now="True")
-    date_created = models.DateTimeField(auto_now_add="True")
-    date_deleted = models.DateTimeField(auto_now_add=True)
+    date_publicated = models.DateTimeField(auto_now=True)
+    date_created = models.DateTimeField(auto_now_add=True)
+    date_deleted = models.DateTimeField(auto_now=True)
 
     status = models.CharField(max_length=20,
                               choices=VISIBILITY_CHOICES,
