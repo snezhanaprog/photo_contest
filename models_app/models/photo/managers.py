@@ -1,32 +1,5 @@
 from django.db import models
-from django.db.models import Q
-
-
-class PhotoQuerySet(models.QuerySet):
-    def search(self, query):
-        return self.filter(Q(name__icontains=query) |
-                           Q(description__icontains=query))
-
-    def filter_by_status(self, status):
-        return self.filter(status=status)
-
-    def sort_by_count_comments_up(self):
-        return self.order_by('count_comments')
-
-    def sort_by_count_comments_down(self):
-        return self.order_by('-count_comments')
-
-    def sort_by_count_voices_up(self):
-        return self.order_by('count_voices')
-
-    def sort_by_count_voices_down(self):
-        return self.order_by('-count_voices')
-
-    def sort_by_date_publicated_up(self):
-        return self.order_by('date_publicated')
-
-    def sort_by_date_publicated_down(self):
-        return self.order_by('-date_publicated')
+from .querysets import PhotoQuerySet
 
 
 class PhotoManager(models.Manager):
