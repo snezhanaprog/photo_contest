@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill
+from .managers import PhotoManager
 
 
 class Photo(models.Model):
@@ -21,7 +22,7 @@ class Photo(models.Model):
     image = models.ImageField(upload_to='images/')
     old_image = models.ImageField(null=True, blank=True)
 
-    image_thumbnail = ImageSpecField(source='images/',
+    image_thumbnail = ImageSpecField(source='image',
                                      processors=[ResizeToFill(100, 50)],
                                      format='JPEG')
 
@@ -34,6 +35,8 @@ class Photo(models.Model):
     status = models.CharField(max_length=20,
                               choices=VISIBILITY_CHOICES,
                               default='private')
+
+    items = PhotoManager()
 
     def __str__(self):
         return self.title
