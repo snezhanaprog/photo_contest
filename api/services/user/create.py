@@ -1,18 +1,18 @@
 from django.contrib.auth.models import User
-from ..base import base
+from service_objects.services import Service
 
 
-class CreateUserService(base.Service):
+class CreateUserService(Service):
     class Meta:
         model = User
         fields = ['username', 'email', 'password']
 
     def process(self):
         user = User(
-            username=self.data['username'],
-            email=self.data['email'],
+            username=self.cleaned_data['username'],
+            email=self.cleaned_data['email'],
         )
-        user.set_password(self.data['password'])
+        user.set_password(self.cleaned_data['password'])
         user.save()
 
         return user
