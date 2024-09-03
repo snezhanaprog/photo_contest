@@ -1,7 +1,7 @@
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
-from api.serializers.photo import PhotoSerializer
+from api.serializers.photo.serializers import PhotoSerializer
 from rest_framework.permissions import IsAuthenticated
 from api.services.photo.list import ListPhotoService
 from api.services.photo.element import ItemPhotoService
@@ -23,15 +23,35 @@ class PhotoUploadView(APIView):
 
 
 class PhotoListView(APIView):
-    def get(self, request):
+    async def get_queryset(self):
         service = ListPhotoService()
-        photos = service.process()
-        serializer = PhotoSerializer(photos, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)
+        search = self.request.GET.get('search')
+        sort = self.request.GET.get('sort')
+        status = self.request.GET.get('status', 'public')
+
+        if status == 'deleted':
+            return await service.process_for_author(
+                search=search,
+                sort=sort,
+                status=status,
+                author=self.request.user
+            )
+
+        return await service.process(search=search, sort=sort, status=status)
+
+    async def get(self, request):
+        try:
+            photos = await self.get_queryset()
+            serializer = PhotoSerializer(photos, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(
+                {"error": str(e)}, status=status.HTTP_400_BAD_REQUEST
+            )
 
 
 class PhotoItemView(APIView):
-    def get(self, reques, photo_id):
+    def get(self, request, photo_id):
         service = ItemPhotoService(data={'photo_id': photo_id})
         if service.is_valid():
             photo = service.process()
@@ -47,7 +67,7 @@ class PhotoUpdateView(APIView):
         service = UpdatePhotoService(data={**request.data,
                                            'photo_id': photo_id})
         if service.is_valid():
-            photo = service.process()
+            photo = service.process(author=request.user)
             serializer = PhotoSerializer(photo)
             return Response(serializer.data, status=status.HTTP_200_OK)
         return Response(service.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -59,6 +79,6 @@ class PhotoDeleteView(APIView):
     def delete(self, request, photo_id):
         service = DeletePhotoService(data={'photo_id': photo_id})
         if service.is_valid():
-            service.process()
+            service.process(author=request.user)
             return Response(status=status.HTTP_204_NO_CONTENT)
         return Response(service.errors, status=status.HTTP_400_BAD_REQUEST)
