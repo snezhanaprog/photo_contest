@@ -28,8 +28,9 @@ class PhotoListView(APIView):
         search = self.request.GET.get('search')
         sort = self.request.GET.get('sort')
         status = self.request.GET.get('status', 'public')
+        is_profile_request = self.request.GET.get('is_profile_request', False)
 
-        if status == 'deleted':
+        if is_profile_request:
             return await service.process_for_author(
                 search=search,
                 sort=sort,
