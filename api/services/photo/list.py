@@ -13,11 +13,10 @@ class ListPhotoService(Service):
             ).search(search).sort_by_field(sort)
 
     async def process_for_author(
-        self,
+        self, author,
         search=None,
         sort=None,
         status='public',
-        author=None
     ):
         if author is None:
             raise ValueError("Автор не может быть None.")
