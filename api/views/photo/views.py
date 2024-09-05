@@ -22,22 +22,39 @@ class PhotoUploadView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class PhotoListView(APIView):
+class PhotoListPublicView(APIView):
+    async def get_queryset(self):
+        service = ListPhotoService()
+        search = self.request.GET.get('search')
+        sort = self.request.GET.get('sort')
+        return await service.process(search=search, sort=sort, status="public")
+
+    async def get(self, request):
+        try:
+            photos = await self.get_queryset()
+            serializer = PhotoSerializer(photos, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            return Response(
+                {"error": str(e)}, status=status.HTTP_400_BAD_REQUEST
+            )
+
+
+class PhotoListForAuthorView(APIView):
+    permission_classes = [IsAuthenticated]
+
     async def get_queryset(self):
         service = ListPhotoService()
         search = self.request.GET.get('search')
         sort = self.request.GET.get('sort')
         status = self.request.GET.get('status', 'public')
 
-        if status == 'deleted':
-            return await service.process_for_author(
+        return await service.process_for_author(
                 search=search,
                 sort=sort,
                 status=status,
                 author=self.request.user
             )
-
-        return await service.process(search=search, sort=sort, status=status)
 
     async def get(self, request):
         try:
