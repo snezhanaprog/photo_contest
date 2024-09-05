@@ -48,7 +48,6 @@ class PhotoListForAuthorView(APIView):
         search = self.request.GET.get('search')
         sort = self.request.GET.get('sort')
         status = self.request.GET.get('status', 'public')
-
         return await service.process_for_author(
                 search=search,
                 sort=sort,
