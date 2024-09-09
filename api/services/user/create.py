@@ -8,11 +8,17 @@ class CreateUserService(Service):
         fields = ['username', 'email', 'password']
 
     def process(self):
+        if not self.data['username']:
+            if not self.data['password'] or not self.data['email']:
+                raise ValueError('Все поля обязательны для заполнения')
+
+        if User.objects.filter(username=self.data['username']).exists():
+            raise ValueError('Пользователь с таким именем уже существует')
         user = User(
-            username=self.cleaned_data['username'],
-            email=self.cleaned_data['email'],
+            username=self.data['username'],
+            email=self.data['email'],
         )
-        user.set_password(self.cleaned_data['password'])
+        user.set_password(self.data['password'])
         user.save()
 
         return user
