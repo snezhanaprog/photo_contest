@@ -4,7 +4,7 @@ from django.db.models import Q
 
 class PhotoQuerySet(models.QuerySet):
     def search(self, query):
-        return self.filter(Q(name__icontains=query) |
+        return self.filter(Q(title__icontains=query) |
                            Q(description__icontains=query))
 
     def filter_by_status(self, status):

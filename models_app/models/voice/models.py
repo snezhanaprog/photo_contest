@@ -6,8 +6,10 @@ from ..base.models import BaseModel
 
 class Voice(BaseModel):
     author = models.ForeignKey(User, on_delete=models.SET_NULL,
-                               null=True, blank=True)
-    photo = models.ForeignKey(Photo, on_delete=models.CASCADE)
+                               null=True, blank=True, related_name="voices")
+    associated_photo = models.ForeignKey(Photo,
+                                         on_delete=models.CASCADE,
+                                         related_name='voices')
 
     class Meta:
         db_table = 'Voice'
