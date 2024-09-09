@@ -4,10 +4,15 @@ from api.services.photo.create import CreatePhotoService
 
 
 class PhotoSerializer(serializers.ModelSerializer):
+
     class Meta:
         model = Photo
-        fields = ['title', 'description', 'author', 'image', 'image_thumbnail',
-                  'count_comments', 'count_voices', 'status']
+        fields = '__all__'
 
     def create(self, validated_data):
         return CreatePhotoService.create_photo(**validated_data)
+
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['image'] = instance.get_absolute_url()
+        return representation
