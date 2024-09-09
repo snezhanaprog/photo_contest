@@ -6,7 +6,7 @@ from ..base.models import BaseModel
 
 
 class Profile(BaseModel):
-    avatar = models.ImageField(upload_to='avatars/')
+    avatar = models.ImageField(upload_to='avatars/', default="default.jpg")
     avatar_thumbnail = ImageSpecField(source='avatar',
                                       processors=[ResizeToFill(100, 50)],
                                       format='JPEG')
@@ -18,4 +18,4 @@ class Profile(BaseModel):
         verbose_name_plural = 'Профили'
 
     def __str__(self):
-        return self.user
+        return str(self.id)
