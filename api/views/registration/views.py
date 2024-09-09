@@ -18,6 +18,7 @@ class RegisterView(APIView):
                 'password': password,
             })
             user = service.process()
+            print("1")
             token = Token.objects.create(user=user)
             return Response(
                 {'auth_token': str(token)},
