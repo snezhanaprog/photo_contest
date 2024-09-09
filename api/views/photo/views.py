@@ -23,15 +23,24 @@ class PhotoUploadView(APIView):
 
 
 class PhotoListPublicView(APIView):
-    async def get_queryset(self):
-        service = ListPhotoService()
-        search = self.request.GET.get('search')
-        sort = self.request.GET.get('sort')
-        return await service.process(search=search, sort=sort, status="public")
 
-    async def get(self, request):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.service = ListPhotoService()
+
+    def get_queryset(self):
+        search = self.request.GET.get('search', '')
+        sort = self.request.GET.get('sort', 'title')
+        print(search, sort)
+        photos = self.service.process(search=search, sort=sort)
+        if photos is None:
+            photos = []
+        return photos
+
+    def get(self, request):
         try:
-            photos = await self.get_queryset()
+            photos = self.get_queryset()
+            photos = list(photos)
             serializer = PhotoSerializer(photos, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
@@ -43,21 +52,24 @@ class PhotoListPublicView(APIView):
 class PhotoListForAuthorView(APIView):
     permission_classes = [IsAuthenticated]
 
-    async def get_queryset(self):
-        service = ListPhotoService()
-        search = self.request.GET.get('search')
-        sort = self.request.GET.get('sort')
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.service = ListPhotoService()
+
+    def get_queryset(self):
+        search = self.request.GET.get('search', '')
+        sort = self.request.GET.get('sort', 'publicated_at')
         status = self.request.GET.get('status', 'public')
-        return await service.process_for_author(
+        return self.service.process_for_author(
                 search=search,
                 sort=sort,
                 status=status,
                 author=self.request.user
             )
 
-    async def get(self, request):
+    def get(self, request):
         try:
-            photos = await self.get_queryset()
+            photos = self.get_queryset()
             serializer = PhotoSerializer(photos, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
