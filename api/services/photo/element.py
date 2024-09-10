@@ -10,6 +10,6 @@ class ItemPhotoService(Service):
 
     def process(self):
         try:
-            return Photo.objects.get(id=self.cleaned_data['photo_id'])
+            return Photo.objects.get(id=self.data.get('photo_id'))
         except Exception as e:
             raise ValidationError(f"Фотография не найдена: {str(e)}")

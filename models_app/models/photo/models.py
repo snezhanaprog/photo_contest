@@ -45,7 +45,7 @@ class Photo(BaseModel):
         verbose_name_plural = 'Фотографии'
 
     def __str__(self):
-        return self.title
+        return self.id
 
     def get_absolute_url(self):
         if self.image:
