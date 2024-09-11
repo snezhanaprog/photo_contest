@@ -14,5 +14,5 @@ class StatusVoiceService(Service):
             Voice.objects.get(
                 author=author, associated_photo=photo)
             return True
-        except (...):
+        except Exception:
             return False
