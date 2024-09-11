@@ -4,7 +4,7 @@ from django.conf.urls.static import static
 from .views.registration.views import RegisterView
 from .views.authorization.views import LoginView
 from .views.photo.views import PhotoListPublicView, PhotoListForAuthorView
-from .views.photo.views import PhotoItemView
+from .views.photo.views import PhotoItemView, PhotoUploadView
 from .views.user.views import UserProfileView
 
 urlpatterns = [
@@ -14,7 +14,8 @@ urlpatterns = [
     path('users-photos/', PhotoListForAuthorView.as_view(),
          name='users-photo'),
     path('user-info/', UserProfileView.as_view(), name="user"),
-    path('photos/<int:photo_id>/', PhotoItemView.as_view(), name="photo")
+    path('photos/<int:photo_id>/', PhotoItemView.as_view(), name="photo"),
+    path('upload-photo/', PhotoUploadView.as_view(), name='upload-photo')
 ]
 
 if settings.DEBUG:
