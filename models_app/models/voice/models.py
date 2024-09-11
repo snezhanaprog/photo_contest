@@ -17,4 +17,4 @@ class Voice(BaseModel):
         verbose_name_plural = 'Голоса'
 
     def __str__(self):
-        return f"photo:{self.photo} author:{self.author}"
+        return str(self.id)
