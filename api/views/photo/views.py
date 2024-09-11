@@ -1,5 +1,6 @@
 from rest_framework import status
 from rest_framework.response import Response
+from rest_framework.parsers import MultiPartParser, FormParser
 from rest_framework.views import APIView
 from api.serializers.photo.serializers import PhotoSerializer
 from rest_framework.permissions import IsAuthenticated
@@ -7,18 +8,22 @@ from api.services.photo.list import ListPhotoService
 from api.services.photo.element import ItemPhotoService
 from api.services.photo.delete import DeletePhotoService
 from api.services.photo.update import UpdatePhotoService
+from api.services.photo.create import CreatePhotoService
 
 
 class PhotoUploadView(APIView):
     permission_classes = [IsAuthenticated]
+    parser_classes = (MultiPartParser, FormParser)
 
     def post(self, request):
-        serializer = PhotoSerializer(data=request.data)
-
-        if serializer.is_valid():
-            serializer.save(author=request.user)
+        service = CreatePhotoService(data=request.data)
+        photo = service.process(author=self.request.user)
+        print(photo.__dict__)
+        try:
+            serializer = PhotoSerializer(photo)
             return Response(serializer.data, status=status.HTTP_201_CREATED)
-
+        except Exception as e:
+            ValueError("Ошибка обработки фотографии:", e)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
