@@ -6,6 +6,8 @@ from .views.authorization.views import LoginView
 from .views.photo.views import PhotoListPublicView, PhotoListForAuthorView
 from .views.photo.views import PhotoItemView, PhotoUploadView
 from .views.user.views import UserProfileView
+from .views.voice.views import StatusVoiceView
+from .views.voice.views import ChangeStatusVoiceView
 
 urlpatterns = [
     path('login/', LoginView.as_view(), name='login'),
@@ -15,7 +17,9 @@ urlpatterns = [
          name='users-photo'),
     path('user-info/', UserProfileView.as_view(), name="user"),
     path('photos/<int:photo_id>/', PhotoItemView.as_view(), name="photo"),
-    path('upload-photo/', PhotoUploadView.as_view(), name='upload-photo')
+    path('upload-photo/', PhotoUploadView.as_view(), name='upload-photo'),
+    path('status-voice/', StatusVoiceView.as_view(), name="status-voice"),
+    path('change-voice/', ChangeStatusVoiceView.as_view(), name="change-voice")
 ]
 
 if settings.DEBUG:

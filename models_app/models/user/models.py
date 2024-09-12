@@ -18,4 +18,6 @@ class Profile(BaseModel):
         verbose_name_plural = 'Профили'
 
     def __str__(self):
-        return str(self.id)
+        if self.user:
+            return str(self.user.username)
+        return str(self.user)
