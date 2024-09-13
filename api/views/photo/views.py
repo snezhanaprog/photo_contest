@@ -5,113 +5,76 @@ from rest_framework.views import APIView
 from api.serializers.photo.serializers import PhotoSerializer
 from rest_framework.permissions import IsAuthenticated
 from api.services.photo.list import ListPhotoService
-from api.services.photo.element import ItemPhotoService
+from api.services.photo.author_list import ListAuthorPhotoService
+from api.services.photo.retrieve import RetrievePhotoService
 from api.services.photo.delete import DeletePhotoService
 from api.services.photo.update import UpdatePhotoService
 from api.services.photo.create import CreatePhotoService
+from utils.django_service_objects.service_objects.services import ServiceOutcome  # noqa: E501
 
 
-class PhotoUploadView(APIView):
+class UploadPhotoView(APIView):
     permission_classes = [IsAuthenticated]
     parser_classes = (MultiPartParser, FormParser)
 
     def post(self, request):
-        service = CreatePhotoService(data=request.data)
-        photo = service.process(author=self.request.user)
-        print(photo.__dict__)
-        try:
-            serializer = PhotoSerializer(photo)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        except Exception as e:
-            ValueError("Ошибка обработки фотографии:", e)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        ServiceOutcome(
+            CreatePhotoService,
+            {**request.data.dict(), "author": request.user}
+        )
+        return Response(status=status.HTTP_200_OK)
 
 
-class PhotoListPublicView(APIView):
+class ListPublicPhotoView(APIView):
+    def get(self, request):
+        outcome = ServiceOutcome(ListPhotoService, request.GET.dict())
+        return Response(
+            PhotoSerializer(outcome.result, many=True).data,
+            status=status.HTTP_200_OK
+        )
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.service = ListPhotoService()
 
-    def get_queryset(self):
-        search = self.request.GET.get('search', '')
-        sort = self.request.GET.get('sort', 'title')
-        print(search, sort)
-        photos = self.service.process(search=search, sort=sort)
-        if photos is None:
-            photos = []
-        return photos
+class ListAuthorPhotoView(APIView):
+    permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        try:
-            photos = self.get_queryset()
-            photos = list(photos)
-            serializer = PhotoSerializer(photos, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response(
-                {"error": str(e)}, status=status.HTTP_400_BAD_REQUEST
-            )
+        data = {
+            'status': request.GET.get('status'),
+            "author": request.user.id
+        }
+        outcome = ServiceOutcome(ListAuthorPhotoService, data)
+        return Response(
+            PhotoSerializer(outcome.result, many=True).data,
+            status=status.HTTP_200_OK
+        )
 
 
-class PhotoListForAuthorView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.service = ListPhotoService()
-
-    def get_queryset(self):
-        search = self.request.GET.get('search', '')
-        sort = self.request.GET.get('sort', 'publicated_at')
-        status = self.request.GET.get('status', 'public')
-        return self.service.process_for_author(
-                search=search,
-                sort=sort,
-                status=status,
-                author=self.request.user
-            )
-
+class RetrievePhotoView(APIView):
     def get(self, request):
-        try:
-            photos = self.get_queryset()
-            serializer = PhotoSerializer(photos, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response(
-                {"error": str(e)}, status=status.HTTP_400_BAD_REQUEST
-            )
+        outcome = ServiceOutcome(RetrievePhotoService, request.GET.dict())
+        return Response(outcome, status=status.HTTP_200_OK)
 
 
-class PhotoItemView(APIView):
-    def get(self, request, photo_id):
-        service = ItemPhotoService(data={'photo_id': photo_id})
-        if service.is_valid():
-            photo = service.process()
-            serializer = PhotoSerializer(photo)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(service.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class PhotoUpdateView(APIView):
+class UpdatePhotoView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def put(self, request, photo_id):
-        service = UpdatePhotoService(data={**request.data,
-                                           'photo_id': photo_id})
-        if service.is_valid():
-            photo = service.process(author=request.user)
-            serializer = PhotoSerializer(photo)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(service.errors, status=status.HTTP_400_BAD_REQUEST)
+    def put(self, request):
+        outcome = ServiceOutcome(
+            UpdatePhotoService,
+            {**request.data.dict(), "author": request.user}
+        )
+        return Response(
+            PhotoSerializer(outcome.data).data,
+            status=status.HTTP_200_OK
+        )
 
 
-class PhotoDeleteView(APIView):
+class DeletePhotoView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def delete(self, request, photo_id):
-        service = DeletePhotoService(data={'photo_id': photo_id})
-        if service.is_valid():
-            service.process(author=request.user)
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(service.errors, status=status.HTTP_400_BAD_REQUEST)
+    def delete(self, request):
+        outcome = ServiceOutcome(
+            DeletePhotoService,
+            {**request.data.dict(), "author": request.user}
+        )
+        return Response(outcome, status=status.HTTP_204_NO_CONTENT)
