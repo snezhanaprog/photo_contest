@@ -1,29 +1,33 @@
 from models_app.models.photo.models import Photo
-from service_objects.services import Service
+from django import forms
+from utils.constants import VISIBILITY_CHOICES
 from django.core.exceptions import ValidationError
+from utils.django_service_objects.service_objects.services import Service
 
 
 class UpdatePhotoService(Service):
-    class Meta:
-        model = Photo
-        fields = ['photo_id', 'title', 'description', 'image', 'status']
+    id = forms.IntegerField(required=True)
+    title = forms.CharField(max_length=100, required=True)
+    description = forms.CharField(max_length=500)
+    author = forms.IntegerField()
+    image = forms.FileInput()
+    status = forms.ChoiceField(choices=VISIBILITY_CHOICES)
 
-    def process(self, author=None):
+    def process(self):
         format = ['image/jpeg', 'image/png']
-        if self.cleaned_data['image'].content_type not in format:
+        if self.data['image'].content_type not in format:
             raise ValidationError(
                 "Недопустимый тип изображения. Разрешены только JPEG, PNG."
             )
 
-        try:
-            photo = Photo.objects.get(id=self.cleaned_data['photo_id'])
-            if photo.author != author:
-                raise PermissionError(
-                    "У вас нет прав для изменения этого фото."
-                )
-            for field, value in self.cleaned_data.items():
-                setattr(photo, field, value)
-            photo.save()
-            return photo
-        except Exception as e:
-            raise ValidationError(f"Фотография не найдена: {str(e)}")
+        self.result = Photo.objects.get(id=self.cleaned_data['id'])
+        if self.result.author != (self.cleaned_data['author']).id:
+            raise PermissionError(
+                "У вас нет прав для изменения этого фото."
+            )
+        for field, value in self.cleaned_data.items():
+            setattr(self.result, field, value)
+        self.result.image = self.data['image']
+        self.result.save()
+        self.response_status = 200
+        return self
