@@ -1,25 +1,41 @@
 from models_app.models.comment.models import Comment
-from service_objects.services import Service
-from django.core.exceptions import ValidationError
+from models_app.models.photo.models import Photo
+from django import forms
+from utils.django_service_objects.service_objects.services import ServiceWithResult  # noqa: E501
 
 
-class CreateCommentService(Service):
-    class Meta:
-        model = Comment
-        fields = ['content', 'associated_photo', 'author', 'parent']
+class CreateCommentService(ServiceWithResult):
+    content = forms.CharField(max_length=500, required=True)
+    author = forms.Field(required=True)
+    photo = forms.IntegerField(required=True)
+    parent = forms.IntegerField(required=False)
 
-    def process(self, author):
-        comment = Comment(
-            content=self.data['content'],
-            associated_photo=self.data['associated_photo'],
-            author=author,
-            parent=self.data['parent']
-            )
+    def process(self):
+        self.result = self._comment
+        return self
+
+    @property
+    def _comment(self):
         try:
-            comment.save()
-        except Exception as e:
-            raise ValidationError(
-                f"Ошибка при создании комментария: {str(e)}"
+            return Comment.objects.create(
+                content=self.cleaned_data['content'],
+                associated_photo=self._photo,
+                author=self.cleaned_data['author'],
+                parent=self._parent
             )
+        except Exception:
+            return None
 
-        return comment
+    @property
+    def _photo(self):
+        try:
+            return Photo.objects.get(id=self.cleaned_data['photo'])
+        except Exception:
+            return None
+
+    @property
+    def _parent(self):
+        try:
+            return Comment.objects.get(id=self.cleaned_data['parent'])
+        except Exception:
+            return None

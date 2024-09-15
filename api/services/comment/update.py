@@ -1,23 +1,29 @@
 from models_app.models.comment.models import Comment
-from service_objects.services import Service
-from django.core.exceptions import ValidationError
+from django import forms
+from utils.django_service_objects.service_objects.services import ServiceWithResult  # noqa: E501
 
 
-class UpdateCommentService(Service):
-    class Meta:
-        model = Comment
-        fields = ['comment_id']
+class UpdateCommentService(ServiceWithResult):
+    id = forms.IntegerField(required=True)
+    content = forms.CharField(max_length=500, required=True)
+    author = forms.Field(required=True)
 
-    def process(self, author=None):
+    def process(self):
+        self.result = self._update()
+        return self
+
+    def _update(self):
+        obj = self._comment
+        obj.content = self.cleaned_data['content']
+        obj.save()
+        return obj
+
+    @property
+    def _comment(self):
         try:
-            comment = Comment.objects.get(id=self.data['comment_id'])
-            if comment.author != author:
-                raise PermissionError(
-                    "У вас нет прав для изменения этого фото."
-                )
-            for field, value in self.data.items():
-                setattr(comment, field, value)
-            comment.save()
-            return comment
-        except Exception as e:
-            raise ValidationError(f"Комментарий не найден: {str(e)}")
+            return Comment.objects.get(
+                id=self.cleaned_data['id'],
+                author=self.cleaned_data['author']
+            )
+        except Exception:
+            return None
