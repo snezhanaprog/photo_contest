@@ -8,10 +8,16 @@ class ListPhotoService(ServiceWithResult):
     sort = forms.CharField(max_length=50)
 
     def process(self):
-        self.result = (
-            Photo.items.filter_by_status(status='public')
-            .search(self.cleaned_data['search'])
-            .sort_by_field(self.cleaned_data['sort'])
-        )
-        self.response_status = 200
+        self.result = self._photos
         return self
+
+    @property
+    def _photos(self):
+        try:
+            return (
+                Photo.items.filter_by_status(status='public')
+                .search(self.cleaned_data['search'])
+                .sort_by_field(self.cleaned_data['sort'])
+            )
+        except Exception:
+            return None

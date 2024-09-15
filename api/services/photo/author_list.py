@@ -5,14 +5,20 @@ from utils.django_service_objects.service_objects.services import ServiceWithRes
 
 
 class ListAuthorPhotoService(ServiceWithResult):
-    author = forms.IntegerField()
+    author = forms.Field()
     status = forms.ChoiceField(choices=VISIBILITY_CHOICES)
 
     def process(self):
-        self.result = Photo.items.filter_by_author(
-                author=self.cleaned_data['author']
-            ).filter_by_status(
-                status=self.cleaned_data['status']
-            )
-        self.response_status = 200
+        self.result = self._photo
         return self
+
+    @property
+    def _photo(self):
+        try:
+            return (
+                Photo.items
+                .filter_by_author(author=self.cleaned_data['author'])
+                .filter_by_status(status=self.cleaned_data['status'])
+            )
+        except Exception:
+            return None
