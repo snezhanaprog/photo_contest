@@ -1,35 +1,47 @@
 from django.contrib.auth.models import User
 from models_app.models.user.models import Profile
-from service_objects.services import Service
+from django import forms
+from utils.django_service_objects.service_objects.services import ServiceWithResult  # noqa: E501
 
 
-class CreateUserService(Service):
-    class Meta:
-        model = User
-        fields = ['username', 'email', 'password']
+class CreateUserService(ServiceWithResult):
+    username = forms.CharField(max_length=50, required=True)
+    password = forms.CharField(max_length=50, required=True)
+    email = forms.EmailField(required=True)
+
+    custom_validations = ['validate_data']
 
     def process(self):
-        if not self.data['username']:
-            if not self.data['password'] or not self.data['email']:
-                raise ValueError('Все поля обязательны для заполнения')
-        if User.objects.filter(username=self.data['username']).exists():
-            raise ValueError(
-                'Пользователь с таким именем или почтой уже существует'
-            )
+        self.run_custom_validations()
+        if self.is_valid():
+            self.result = self._user
+            self.result.save()
+            self._profile
+        return self
+
+    @property
+    def _user(self):
         try:
             user = User(
-                username=self.data['username'],
-                email=self.data['email'],
+                username=self.cleaned_data['username'],
+                email=self.cleaned_data['email'],
             )
-            user.set_password(self.data['password'])
-            user.save()
-        except Exception as e:
-            raise ValueError("Ошибка создания user" + e)
+            user.set_password(self.cleaned_data['password'])
+            return user
+        except Exception:
+            return None
+
+    @property
+    def _profile(self):
         try:
-            profile = Profile.objects.create(
-                user=user
-            )
-        except Exception as e:
-            raise ValueError("Ошибка создания profile" + e)
-        print("Профиль создан", profile.__str__)
-        return user
+            Profile.objects.create(user=self._user)
+        except Exception:
+            return None
+
+    def validate_data(self):
+        username = self.cleaned_data['username']
+        email = self.cleaned_data['email']
+        if User.objects.filter(username=username).exists():
+            raise ValueError('Пользователь с таким именем уже существует')
+        if User.objects.filter(email=email).exists():
+            raise ValueError('Пользователь с такой почтой уже существует')
