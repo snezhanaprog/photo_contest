@@ -1,20 +1,30 @@
 from models_app.models.voice.models import Voice
 from models_app.models.photo.models import Photo
-from service_objects.services import Service
-from django.core.exceptions import ValidationError
+from django import forms
+from utils.django_service_objects.service_objects.services import ServiceWithResult  # noqa: E501
 
 
-class DeleteVoiceService(Service):
-    class Meta:
-        model = Voice
-        fields = ['author', 'associated_photo'],
+class DeleteVoiceService(ServiceWithResult):
+    author = forms.Field()
+    photo_id = forms.IntegerField()
 
-    def process(self, author):
-        print("del")
+    def process(self):
+        self.result = self._voice.delete()
+        return self
+
+    @property
+    def _photo(self):
         try:
-            photo = Photo.objects.get(id=self.data['photo_id'])
-            voice = Voice.objects.get(author=author, associated_photo=photo)
-            voice.delete()
-            return voice
-        except Exception:
-            raise ValidationError("Ошибка удаления")
+            return Photo.objects.get(id=self.cleaned_data['photo_id'])
+        except Photo.DoesNotExist:
+            return None
+
+    @property
+    def _voice(self):
+        try:
+            return Voice.objects.get(
+                author=self.cleaned_data['author'],
+                associated_photo=self._photo,
+            )
+        except Photo.DoesNotExist:
+            return None
