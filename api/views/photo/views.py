@@ -18,11 +18,14 @@ class UploadPhotoView(APIView):
     parser_classes = (MultiPartParser, FormParser)
 
     def post(self, request):
-        ServiceOutcome(
+        outcome = ServiceOutcome(
             CreatePhotoService,
             {**request.data.dict(), "author": request.user}
         )
-        return Response(status=status.HTTP_200_OK)
+        return Response(
+            PhotoSerializer(outcome.result).data,
+            status=status.HTTP_200_OK
+        )
 
 
 class ListPublicPhotoView(APIView):
@@ -40,7 +43,7 @@ class ListAuthorPhotoView(APIView):
     def get(self, request):
         data = {
             'status': request.GET.get('status'),
-            "author": request.user.id
+            "author": request.user
         }
         outcome = ServiceOutcome(ListAuthorPhotoService, data)
         return Response(
@@ -50,21 +53,24 @@ class ListAuthorPhotoView(APIView):
 
 
 class RetrievePhotoView(APIView):
-    def get(self, request):
-        outcome = ServiceOutcome(RetrievePhotoService, request.GET.dict())
-        return Response(outcome, status=status.HTTP_200_OK)
+    def get(self, request, id):
+        outcome = ServiceOutcome(RetrievePhotoService,
+                                 {'id': id, "author": request.user})
+        return Response(
+            PhotoSerializer(outcome.result).data,
+            status=status.HTTP_200_OK)
 
 
 class UpdatePhotoView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def put(self, request):
+    def put(self, request, id):
         outcome = ServiceOutcome(
             UpdatePhotoService,
-            {**request.data.dict(), "author": request.user}
+            {**request.data.dict(), "author": request.user, "id": id}
         )
         return Response(
-            PhotoSerializer(outcome.data).data,
+            PhotoSerializer(outcome.result).data,
             status=status.HTTP_200_OK
         )
 
@@ -72,9 +78,9 @@ class UpdatePhotoView(APIView):
 class DeletePhotoView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def delete(self, request):
-        outcome = ServiceOutcome(
+    def delete(self, request, id):
+        ServiceOutcome(
             DeletePhotoService,
-            {**request.data.dict(), "author": request.user}
+            {"author": request.user, "id": id}
         )
-        return Response(outcome, status=status.HTTP_204_NO_CONTENT)
+        return Response(status=status.HTTP_204_NO_CONTENT)
