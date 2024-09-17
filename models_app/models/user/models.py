@@ -3,6 +3,7 @@ from imagekit.models import ImageSpecField
 from imagekit.processors import ResizeToFill
 from django.contrib.auth.models import User
 from ..base.models import BaseModel
+from django.conf import settings
 
 
 class Profile(BaseModel):
@@ -21,3 +22,8 @@ class Profile(BaseModel):
         if self.user:
             return str(self.user.username)
         return str(self.user)
+
+    def get_absolute_url(self):
+        if self.avatar:
+            return f"{settings.MEDIA_URL}{self.avatar}"
+        return None
