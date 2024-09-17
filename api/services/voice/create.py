@@ -2,10 +2,11 @@ from models_app.models.voice.models import Voice
 from models_app.models.photo.models import Photo
 from django import forms
 from utils.django_service_objects.service_objects.services import ServiceWithResult  # noqa: E501
+from django.contrib.auth.models import User
 
 
 class CreateVoiceService(ServiceWithResult):
-    author = forms.Field()
+    author_id = forms.IntegerField()
     photo_id = forms.IntegerField()
 
     def process(self):
@@ -14,17 +15,15 @@ class CreateVoiceService(ServiceWithResult):
 
     @property
     def _photo(self):
-        try:
-            return Photo.objects.get(id=self.cleaned_data['photo_id'])
-        except Photo.DoesNotExist:
-            return None
+        return Photo.objects.get(id=self.cleaned_data['photo_id'])
 
     @property
     def _voice(self):
-        try:
-            return Voice.objects.get_or_create(
-                author=self.cleaned_data['author'],
-                associated_photo=self._photo,
-            )
-        except Photo.DoesNotExist:
-            return None
+        return Voice.objects.get_or_create(
+            author=self._author,
+            associated_photo=self._photo,
+        )
+
+    @property
+    def _author(self):
+        return User.objects.get(id=self.cleaned_data['author_id'])
