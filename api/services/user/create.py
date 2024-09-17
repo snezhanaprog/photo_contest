@@ -15,7 +15,7 @@ class CreateUserService(ServiceWithResult):
         self.run_custom_validations()
         if self.is_valid():
             self.result = self._user
-            self.result.save()
+            print(self.result.__dict__, 'data')
             self._profile
         return self
 
@@ -27,16 +27,14 @@ class CreateUserService(ServiceWithResult):
                 email=self.cleaned_data['email'],
             )
             user.set_password(self.cleaned_data['password'])
+            user.save()
             return user
-        except Exception:
-            return None
+        except Exception as e:
+            raise ValueError("Ошибка создания пользователя: ", e)
 
     @property
     def _profile(self):
-        try:
-            Profile.objects.create(user=self._user)
-        except Exception:
-            return None
+        Profile.objects.create(user=self.result)
 
     def validate_data(self):
         username = self.cleaned_data['username']

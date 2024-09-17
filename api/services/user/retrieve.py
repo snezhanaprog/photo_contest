@@ -5,7 +5,7 @@ from utils.django_service_objects.service_objects.services import ServiceWithRes
 
 
 class RetrieveUserService(ServiceWithResult):
-    username = forms.CharField(max_length=50, required=True)
+    id = forms.CharField(max_length=50)
 
     def process(self):
         self.result = {
@@ -16,14 +16,8 @@ class RetrieveUserService(ServiceWithResult):
 
     @property
     def _user(self):
-        try:
-            return User.objects.get(username=self.cleaned_data['username'])
-        except User.DoesNotExist:
-            return None
+        return User.objects.get(id=self.cleaned_data['id'])
 
     @property
     def _profile(self):
-        try:
-            return Profile.objects.get(user=self._user)
-        except User.DoesNotExist:
-            return None
+        return Profile.objects.get(user=self._user)
