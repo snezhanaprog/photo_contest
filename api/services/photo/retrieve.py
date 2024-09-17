@@ -4,8 +4,7 @@ from utils.django_service_objects.service_objects.services import ServiceWithRes
 
 
 class RetrievePhotoService(ServiceWithResult):
-    id = forms.IntegerField(required=True)
-    author = forms.Field(required=False)
+    id = forms.IntegerField()
 
     def process(self):
         self.result = self._photo
@@ -13,7 +12,4 @@ class RetrievePhotoService(ServiceWithResult):
 
     @property
     def _photo(self):
-        try:
-            return Photo.objects.get(id=self.cleaned_data['id'])
-        except Photo.DoesNotExist:
-            return None
+        return Photo.objects.get(id=self.cleaned_data['id'])

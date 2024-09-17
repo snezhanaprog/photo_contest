@@ -2,16 +2,17 @@ from models_app.models.photo.models import Photo
 from django import forms
 from django.core.exceptions import ValidationError
 from utils.django_service_objects.service_objects.services import ServiceWithResult  # noqa: E501
+from django.contrib.auth.models import User
 
 
 class UpdatePhotoService(ServiceWithResult):
     id = forms.IntegerField(required=True)
     title = forms.CharField(max_length=100, required=True)
     description = forms.CharField(max_length=500)
-    author = forms.Field()
+    author_id = forms.IntegerField()
     image = forms.FileInput()
 
-    custom_validations = ['validate_format']
+    custom_validations = ['validate_permission', 'validate_format']
 
     def process(self):
         self.run_custom_validations()
@@ -21,13 +22,11 @@ class UpdatePhotoService(ServiceWithResult):
 
     @property
     def _photo(self):
-        try:
-            return Photo.objects.get(
-                id=self.cleaned_data['id'],
-                author=self.cleaned_data['author']
-            )
-        except Photo.DoesNotExist:
-            return None
+        return Photo.objects.get(id=self.cleaned_data['id'])
+
+    @property
+    def _author(self):
+        return User.objects.get(id=self.cleaned_data['author_id'])
 
     def _update(self):
         obj = self._photo
@@ -46,3 +45,7 @@ class UpdatePhotoService(ServiceWithResult):
             if self.data['image'].content_type not in type:
                 raise ValidationError(
                     "Ошибка типа. Разрешены только JPEG, PNG.")
+
+    def validate_permission(self):
+        if self._author != self._photo.author:
+            PermissionError("Пользователь не имеет прав на изменение")
