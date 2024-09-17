@@ -1,5 +1,6 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from api.serializers.user.serializers import UserSerializer, ProfileSerializer
 from api.services.user.retrieve import RetrieveUserService
 from rest_framework.permissions import IsAuthenticated
 from utils.django_service_objects.service_objects.services import ServiceOutcome  # noqa: E501
@@ -12,30 +13,17 @@ class UserProfileView(APIView):
     permission_classes = [IsAuthenticated,]
 
     def get(self, request):
-        outcome = ServiceOutcome(
-            RetrieveUserService,
-            {'username': request.user.username}
-        )
-        if outcome.result['profile'].avatar:
-            avatar_url = outcome.result['profile'].avatar.url
-        else:
-            avatar_url = None
+        outcome = ServiceOutcome(RetrieveUserService, {'id': request.user.id})
         return Response({
-                'user': {
-                    'username': outcome.result['user'].username,
-                    'email': outcome.result['user'].email,
-                },
-                'profile': {
-                    'avatar': avatar_url,
-                }
-            })
+                   'user': UserSerializer(outcome.result['user']).data,
+                   'profile': ProfileSerializer(outcome.result['profile']).data
+                }, status=status.HTTP_200_OK)
 
 
 class RegisterView(APIView):
     def post(self, request):
         ServiceOutcome(CreateUserService, request.data)
         outcome = ServiceOutcome(RetrieveTokenService, request.data)
-        print(outcome.__dict__)
         return Response(
             {'auth_token': str(outcome.result)},
             status=status.HTTP_201_CREATED

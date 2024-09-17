@@ -17,7 +17,7 @@ class CreateCommentView(APIView):
     def post(self, request):
         outcome = ServiceOutcome(
             CreateCommentService,
-            {**request.data.dict(), "author": request.user}
+            {**request.data.dict(), "author_id": request.user.id}
         )
         return Response(
             CommentSerializer(outcome.result).data,
@@ -37,7 +37,7 @@ class ListCommentView(APIView):
 class RetrieveCommentView(APIView):
     def get(self, request, id):
         outcome = ServiceOutcome(RetrieveCommentService,
-                                 {'id': id, "author": request.user})
+                                 {'id': id, "author_id": request.user.id})
         return Response(
             CommentSerializer(outcome.result).data,
             status=status.HTTP_200_OK
@@ -50,7 +50,7 @@ class UpdateCommentView(APIView):
     def put(self, request, id):
         outcome = ServiceOutcome(
             UpdateCommentService,
-            {**request.data.dict(), "author": request.user, 'id': id}
+            {**request.data.dict(), "author_id": request.user.id, 'id': id}
         )
         return Response(
             CommentSerializer(outcome.result).data,
@@ -64,6 +64,6 @@ class DeleteCommentView(APIView):
     def delete(self, request, id):
         ServiceOutcome(
             DeleteCommentService,
-            {"author": request.user, 'id': id}
+            {"author_id": request.user.id, 'id': id}
         )
         return Response(status=status.HTTP_204_NO_CONTENT)

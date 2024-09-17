@@ -20,7 +20,7 @@ class UploadPhotoView(APIView):
     def post(self, request):
         outcome = ServiceOutcome(
             CreatePhotoService,
-            {**request.data.dict(), "author": request.user}
+            {**request.data.dict(), "author_id": request.user.id}
         )
         return Response(
             PhotoSerializer(outcome.result).data,
@@ -43,7 +43,7 @@ class ListAuthorPhotoView(APIView):
     def get(self, request):
         data = {
             'status': request.GET.get('status'),
-            "author": request.user
+            "author_id": request.user.id
         }
         outcome = ServiceOutcome(ListAuthorPhotoService, data)
         return Response(
@@ -55,7 +55,7 @@ class ListAuthorPhotoView(APIView):
 class RetrievePhotoView(APIView):
     def get(self, request, id):
         outcome = ServiceOutcome(RetrievePhotoService,
-                                 {'id': id, "author": request.user})
+                                 {'id': id, "author_id": request.user.id})
         return Response(
             PhotoSerializer(outcome.result).data,
             status=status.HTTP_200_OK)
@@ -67,7 +67,7 @@ class UpdatePhotoView(APIView):
     def put(self, request, id):
         outcome = ServiceOutcome(
             UpdatePhotoService,
-            {**request.data.dict(), "author": request.user, "id": id}
+            {**request.data.dict(), "author_id": request.user.id, "id": id}
         )
         return Response(
             PhotoSerializer(outcome.result).data,
@@ -81,6 +81,6 @@ class DeletePhotoView(APIView):
     def delete(self, request, id):
         ServiceOutcome(
             DeletePhotoService,
-            {"author": request.user, "id": id}
+            {"author_id": request.user.id, "id": id}
         )
         return Response(status=status.HTTP_204_NO_CONTENT)

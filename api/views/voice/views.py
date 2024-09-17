@@ -14,7 +14,7 @@ class CreateVoiceView(APIView):
     def post(self, request):
         outcome = ServiceOutcome(
             CreateVoiceService,
-            {**request.data, "author": request.user}
+            {**request.data, "author_id": request.user.id}
         )
         return Response(
             VoiceSerializer(outcome.result).data,
@@ -28,6 +28,6 @@ class DeleteVoiceView(APIView):
     def post(self, request):
         ServiceOutcome(
             DeleteVoiceService,
-            {**request.data, "author": request.user}
+            {**request.data, "author_id": request.user.id}
         )
         return Response(status=status.HTTP_204_NO_CONTENT)
