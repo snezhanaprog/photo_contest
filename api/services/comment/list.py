@@ -5,7 +5,7 @@ from utils.django_service_objects.service_objects.services import ServiceWithRes
 
 
 class ListCommentService(ServiceWithResult):
-    photo = forms.IntegerField(required=True)
+    photo_id = forms.IntegerField()
     parent = forms.IntegerField(required=False)
 
     def process(self):
@@ -14,24 +14,18 @@ class ListCommentService(ServiceWithResult):
 
     @property
     def _comments(self):
-        try:
-            return Comment.objects.filter(
-                associated_photo=self._photo,
-                parent=self._parent
-            )
-        except Exception:
-            return None
+        return Comment.objects.filter(
+            associated_photo=self._photo,
+            parent=self._parent
+        )
 
     @property
     def _photo(self):
-        try:
-            return Photo.objects.get(id=self.cleaned_data['photo'])
-        except Exception:
-            return None
+        return Photo.objects.get(id=self.cleaned_data['photo_id'])
 
     @property
     def _parent(self):
         try:
             return Comment.objects.get(id=self.cleaned_data['parent'])
-        except Exception:
+        except Comment.DoesNotExist:
             return None

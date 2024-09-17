@@ -4,7 +4,7 @@ from utils.django_service_objects.service_objects.services import ServiceWithRes
 
 
 class RetrieveCommentService(ServiceWithResult):
-    id = forms.IntegerField(required=True)
+    id = forms.IntegerField()
 
     def process(self):
         self.result = self._comment
@@ -12,7 +12,4 @@ class RetrieveCommentService(ServiceWithResult):
 
     @property
     def _comment(self):
-        try:
-            return Comment.objects.get(id=self.cleaned_data['id'])
-        except Exception:
-            return None
+        return Comment.objects.get(id=self.cleaned_data['id'])

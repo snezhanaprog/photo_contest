@@ -1,12 +1,15 @@
 from models_app.models.comment.models import Comment
 from django import forms
 from utils.django_service_objects.service_objects.services import ServiceWithResult  # noqa: E501
+from django.contrib.auth.models import User
 
 
 class UpdateCommentService(ServiceWithResult):
-    id = forms.IntegerField(required=True)
-    content = forms.CharField(max_length=500, required=True)
-    author = forms.Field(required=True)
+    id = forms.IntegerField()
+    content = forms.CharField(max_length=500)
+    author_id = forms.IntegerField()
+
+    custom_validations = ['validate_permission']
 
     def process(self):
         self.result = self._update()
@@ -20,10 +23,15 @@ class UpdateCommentService(ServiceWithResult):
 
     @property
     def _comment(self):
-        try:
-            return Comment.objects.get(
-                id=self.cleaned_data['id'],
-                author=self.cleaned_data['author']
-            )
-        except Exception:
-            return None
+        return Comment.objects.get(
+            id=self.cleaned_data['id'],
+            author=self._author
+        )
+
+    @property
+    def _author(self):
+        return User.objects.get(id=self.cleaned_data['author_id'])
+
+    def validate_permission(self):
+        if self._author != self._comment.author:
+            PermissionError("Пользователь не имеет прав на изменение")
