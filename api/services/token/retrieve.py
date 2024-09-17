@@ -14,17 +14,11 @@ class RetrieveTokenService(ServiceWithResult):
 
     @property
     def _token(self):
-        try:
-            return Token.objects.get_or_create(user=self._user)
-        except Exception:
-            return None
+        return Token.objects.get_or_create(user=self._user)
 
     @property
     def _user(self):
-        try:
-            return authenticate(
-                username=self.cleaned_data['username'],
-                password=self.cleaned_data['password']
-            )
-        except Exception:
-            return None
+        return authenticate(
+            username=self.cleaned_data['username'],
+            password=self.cleaned_data['password']
+        )
