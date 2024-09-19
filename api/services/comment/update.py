@@ -23,10 +23,7 @@ class UpdateCommentService(ServiceWithResult):
 
     @property
     def _comment(self):
-        return Comment.objects.get(
-            id=self.cleaned_data['id'],
-            author=self._author
-        )
+        return Comment.objects.get(id=self.cleaned_data['id'])
 
     @property
     def _author(self):
