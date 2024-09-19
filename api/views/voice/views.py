@@ -6,11 +6,15 @@ from rest_framework.permissions import IsAuthenticated
 from api.services.voice.delete import DeleteVoiceService
 from api.services.voice.create import CreateVoiceService
 from utils.django_service_objects.service_objects.services import ServiceOutcome  # noqa: E501
+from api.docs.voice.create import parameters as create_parameters
+from api.docs.voice.delete import parameters as delete_parameters
+from drf_yasg.utils import swagger_auto_schema
 
 
 class CreateVoiceView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(**create_parameters)
     def post(self, request):
         outcome = ServiceOutcome(
             CreateVoiceService,
@@ -25,6 +29,7 @@ class CreateVoiceView(APIView):
 class DeleteVoiceView(APIView):
     permission_classes = [IsAuthenticated]
 
+    @swagger_auto_schema(**delete_parameters)
     def post(self, request):
         ServiceOutcome(
             DeleteVoiceService,

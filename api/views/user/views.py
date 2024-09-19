@@ -7,11 +7,16 @@ from utils.django_service_objects.service_objects.services import ServiceOutcome
 from rest_framework import status
 from api.services.token.retrieve import RetrieveTokenService
 from api.services.user.create import CreateUserService
+from api.docs.user.authorization import parameters as authorization_parameters
+from api.docs.user.registration import parameters as registration_parameters
+from api.docs.user.retrieve import parameters as retrieve_parameters
+from drf_yasg.utils import swagger_auto_schema
 
 
 class UserProfileView(APIView):
     permission_classes = [IsAuthenticated,]
 
+    @swagger_auto_schema(**retrieve_parameters)
     def get(self, request):
         outcome = ServiceOutcome(RetrieveUserService, {'id': request.user.id})
         return Response({
@@ -21,6 +26,7 @@ class UserProfileView(APIView):
 
 
 class RegisterView(APIView):
+    @swagger_auto_schema(**registration_parameters)
     def post(self, request):
         ServiceOutcome(CreateUserService, request.data)
         outcome = ServiceOutcome(RetrieveTokenService, request.data)
@@ -31,6 +37,7 @@ class RegisterView(APIView):
 
 
 class LoginView(APIView):
+    @swagger_auto_schema(**authorization_parameters)
     def post(self, request):
         outcome = ServiceOutcome(RetrieveTokenService, request.data)
         return Response(
