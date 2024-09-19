@@ -1,12 +1,12 @@
 from drf_yasg import openapi
-from api.serializers.comment.serializers import CommentSerializer
+from api.serializers.photo.serializers import PhotoSerializer
 
 
-def get_comment_properties():
-    comment_fields = CommentSerializer().get_fields()
+def get_photo_properties():
+    photo_fields = PhotoSerializer().get_fields()
     properties = {}
 
-    for field_name, field in comment_fields.items():
+    for field_name, field in photo_fields.items():
         properties[field_name] = openapi.Schema(
             type=openapi.TYPE_OBJECT,
             description=field.help_text or "",
@@ -17,19 +17,12 @@ def get_comment_properties():
 
 MANUAL_PARAMS = [
     openapi.Parameter(
-        name="photo_id",
-        in_=openapi.IN_BODY,
-        description="Photo id",
-        type=openapi.TYPE_INTEGER,
+        name='status',
+        in_=openapi.IN_QUERY,
+        description='Sorting photos by status',
+        type=openapi.TYPE_STRING,
         required=True,
     ),
-    openapi.Parameter(
-        name="parent",
-        in_=openapi.IN_BODY,
-        description="Parent comment id",
-        type=openapi.TYPE_INTEGER,
-        required=False,
-    )
 ]
 
 RESPONSES = {
@@ -39,25 +32,28 @@ RESPONSES = {
             type=openapi.TYPE_ARRAY,
             items=openapi.Schema(
                 type=openapi.TYPE_OBJECT,
-                properties=get_comment_properties(),
+                properties=get_photo_properties(),
             ),
         ),
     ),
+    "401": openapi.Response(
+        description="Unauthorized",
+    ),
     "404": openapi.Response(
-        description="Photo not found",
+        description="Author not found",
         schema=openapi.Schema(
             title="NotFoundError",
             type=openapi.TYPE_OBJECT,
             properties={
                 "detail": openapi.Schema(type=openapi.TYPE_STRING,
-                                         example="Photo does not exist"),
+                                         example="Author does not exist"),
             },
         ),
     ),
 }
 
 parameters = {
-    "tags": ["Comment"],
+    "tags": ["Photo"],
     "manual_parameters": MANUAL_PARAMS,
     "responses": RESPONSES,
 }
