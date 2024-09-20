@@ -17,4 +17,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation['avatar'] = instance.get_absolute_url()
+        if hasattr(instance, 'user'):
+            user_obj = instance.user
+            representation['user'] = user_obj.username
         return representation
