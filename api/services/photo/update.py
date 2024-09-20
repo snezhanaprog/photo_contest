@@ -35,7 +35,7 @@ class UpdatePhotoService(ServiceWithResult):
         obj.old_image = obj.image
         if 'image' in self.data:
             obj.image = self.data['image']
-        obj.status = "private"
+            obj.status = "private"
         obj.save()
         return obj
 
