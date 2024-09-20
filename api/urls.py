@@ -2,6 +2,7 @@ from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
 from .views.user.views import UserProfileView, RegisterView, LoginView
+from .views.user.views import UploadAvatarView
 from .views.photo.views import ListPublicPhotoView, ListAuthorPhotoView
 from .views.photo.views import RetrievePhotoView, UploadPhotoView
 from .views.photo.views import UpdatePhotoView, DeletePhotoView
@@ -14,6 +15,8 @@ urlpatterns = [
     path('login/', LoginView.as_view(), name='login'),
     path('register/', RegisterView.as_view(), name='register'),
     path('user-info/', UserProfileView.as_view(), name="user"),
+    path('upload-avatar/', UploadAvatarView.as_view(),
+         name='upload-avatar'),
 
     path('photos/', ListPublicPhotoView.as_view(), name="photos"),
     path('users-photos/', ListAuthorPhotoView.as_view(),
