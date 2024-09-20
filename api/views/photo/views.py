@@ -41,7 +41,10 @@ class ListPublicPhotoView(APIView):
     def get(self, request):
         outcome = ServiceOutcome(ListPhotoService, request.GET.dict())
         return Response(
-            PhotoSerializer(outcome.result, many=True).data,
+            PhotoSerializer(
+                outcome.result,
+                context={'user': request.user},
+                many=True).data,
             status=status.HTTP_200_OK
         )
 
@@ -68,7 +71,9 @@ class RetrievePhotoView(APIView):
         outcome = ServiceOutcome(RetrievePhotoService,
                                  {'id': id, "author_id": request.user.id})
         return Response(
-            PhotoSerializer(outcome.result).data,
+            PhotoSerializer(
+                outcome.result,
+                context={'user': request.user}).data,
             status=status.HTTP_200_OK)
 
 
