@@ -1,6 +1,11 @@
 __pycache__/
 .venv/
 .env
+.env-example
 *.env
 .idea/
-./models_app/migrstions/
+models_app/migrations/
+utils/
+models_app/migrations
+conf/media
+utils
