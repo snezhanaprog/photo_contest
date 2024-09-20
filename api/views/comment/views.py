@@ -37,7 +37,10 @@ class ListCommentView(APIView):
     def get(self, request):
         outcome = ServiceOutcome(ListCommentService, request.GET.dict())
         return Response(
-            CommentSerializer(outcome.result, many=True).data,
+            CommentSerializer(
+                outcome.result,
+                context={'user': request.user},
+                many=True).data,
             status=status.HTTP_200_OK
         )
 
@@ -48,7 +51,9 @@ class RetrieveCommentView(APIView):
         outcome = ServiceOutcome(RetrieveCommentService,
                                  {'id': id, "author_id": request.user.id})
         return Response(
-            CommentSerializer(outcome.result).data,
+            CommentSerializer(
+                outcome.result,
+                context={'user': request.user}).data,
             status=status.HTTP_200_OK
         )
 
