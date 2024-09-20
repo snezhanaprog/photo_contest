@@ -11,11 +11,12 @@ class PhotoSerializer(serializers.ModelSerializer):
         model = Photo
         fields = '__all__'
 
-    def is_liked_photo(self, author, photo):
+    def get_is_liked(self, obj):
+        user = self.context.get("user")
         try:
             voice = Voice.objects.get(
-                author=author,
-                associated_photo=photo
+                author=user,
+                associated_photo=obj
                 )
             if voice:
                 return True
@@ -25,12 +26,6 @@ class PhotoSerializer(serializers.ModelSerializer):
     def to_representation(self, instance):
         repr = super().to_representation(instance)
         repr['image'] = instance.get_absolute_url()
-
         author_obj = User.objects.get(id=repr['author'])
-        photo_obj = Photo.objects.get(id=repr['id'])
-
         repr['author'] = author_obj.username
-        repr['is_liked'] = self.is_liked_photo(
-            author=author_obj, photo=photo_obj
-        )
         return repr
