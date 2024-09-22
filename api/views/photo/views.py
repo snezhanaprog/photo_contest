@@ -40,13 +40,13 @@ class ListPublicPhotoView(APIView):
     @swagger_auto_schema(**list_parameters)
     def get(self, request):
         outcome = ServiceOutcome(ListPhotoService, request.GET.dict())
-        return Response(
-            PhotoSerializer(
-                outcome.result,
+        return Response({
+            "pagination": outcome.result['pagination'].to_json(),
+            "photos": PhotoSerializer(
+                outcome.result['photos'],
                 context={'user': request.user},
-                many=True).data,
-            status=status.HTTP_200_OK
-        )
+                many=True).data
+            }, status=status.HTTP_200_OK)
 
 
 class ListAuthorPhotoView(APIView):
@@ -55,14 +55,15 @@ class ListAuthorPhotoView(APIView):
     @swagger_auto_schema(**author_list_parameters)
     def get(self, request):
         data = {
-            'status': request.GET.get('status'),
+            **request.GET.dict(),
             "author_id": request.user.id
         }
         outcome = ServiceOutcome(ListAuthorPhotoService, data)
-        return Response(
-            PhotoSerializer(outcome.result, many=True).data,
-            status=status.HTTP_200_OK
-        )
+        return Response({
+            "pagination": outcome.result['pagination'].to_json(),
+            "photos": PhotoSerializer(
+                outcome.result['photos'], many=True).data
+            }, status=status.HTTP_200_OK)
 
 
 class RetrievePhotoView(APIView):
