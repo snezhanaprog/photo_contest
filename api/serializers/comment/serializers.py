@@ -18,6 +18,6 @@ class CommentSerializer(serializers.ModelSerializer):
 
     def get_is_change(self, obj):
         user = self.context.get("user")
-        if user.id == obj.author.id:
+        if user and user.id == obj.author.id:
             return True
         return False
