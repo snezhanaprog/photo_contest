@@ -1,6 +1,7 @@
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.parsers import FormParser
 from api.serializers.comment.serializers import CommentSerializer
 from rest_framework.permissions import IsAuthenticated
 from api.services.comment.list import ListCommentService
@@ -19,6 +20,7 @@ from api.docs.comment.update import parameters as update_parameters
 
 class CreateCommentView(APIView):
     permission_classes = [IsAuthenticated]
+    parser_classes = (FormParser,)
 
     @swagger_auto_schema(**create_parameters)
     def post(self, request):
@@ -60,6 +62,7 @@ class RetrieveCommentView(APIView):
 
 class UpdateCommentView(APIView):
     permission_classes = [IsAuthenticated]
+    parser_classes = (FormParser,)
 
     @swagger_auto_schema(**update_parameters)
     def put(self, request, id):
