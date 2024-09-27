@@ -15,7 +15,6 @@ class CreateUserService(ServiceWithResult):
         self.run_custom_validations()
         if self.is_valid():
             self.result = self._user
-            print(self.result.__dict__, 'data')
             self._profile
         return self
 

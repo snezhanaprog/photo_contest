@@ -1,8 +1,9 @@
 from models_app.models.photo.models import Photo
 from django import forms
 from utils.django_service_objects.service_objects.services import ServiceWithResult  # noqa: E501
-from django.core.exceptions import ValidationError
+from utils.django_service_objects.service_objects.errors import ValidationError  # noqa: E501
 from django.contrib.auth.models import User
+from utils.django_service_objects.service_objects.errors import NotFound
 
 
 class CreatePhotoService(ServiceWithResult):
@@ -11,7 +12,7 @@ class CreatePhotoService(ServiceWithResult):
     image = forms.FileInput()
     author_id = forms.IntegerField()
 
-    custom_validations = ['validate_format']
+    custom_validations = ['validate_format', 'validate_presence_author']
 
     def process(self):
         self.run_custom_validations()
@@ -37,4 +38,14 @@ class CreatePhotoService(ServiceWithResult):
         if self.data['image'].content_type not in format:
             raise ValidationError(
                 "Недопустимый тип изображения. Разрешены только JPEG, PNG."
+            )
+
+    def validate_presence_author(self):
+        if not self._author:
+            self.add_error(
+                "id",
+                NotFound(
+                    message=f"Not found user with id = {
+                        self.cleaned_data['author_id']}"
+                ),
             )

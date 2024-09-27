@@ -5,6 +5,7 @@ from utils.django_service_objects.service_objects.services import ServiceWithRes
 from django.contrib.auth.models import User
 from django.core.paginator import Paginator
 from utils.custom_pagination import CustomPagination
+from utils.django_service_objects.service_objects.errors import NotFound
 
 
 class ListAuthorPhotoService(ServiceWithResult):
@@ -13,8 +14,12 @@ class ListAuthorPhotoService(ServiceWithResult):
     current_page = forms.IntegerField(required=False)
     per_page = forms.IntegerField(required=False)
 
+    custom_validations = ['validate_presence_author']
+
     def process(self):
-        self.result = self.pagination_photos()
+        self.run_custom_validations()
+        if self.is_valid():
+            self.result = self.pagination_photos()
         return self
 
     @property
@@ -41,3 +46,13 @@ class ListAuthorPhotoService(ServiceWithResult):
             "pagination": pagination,
             "photos": photos_page
         }
+
+    def validate_presence_author(self):
+        if not self._author:
+            self.add_error(
+                "id",
+                NotFound(
+                    message=f"Not found user with id = {
+                        self.cleaned_data['author_id']}"
+                ),
+            )
