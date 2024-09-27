@@ -5,113 +5,102 @@ from rest_framework.views import APIView
 from api.serializers.photo.serializers import PhotoSerializer
 from rest_framework.permissions import IsAuthenticated
 from api.services.photo.list import ListPhotoService
-from api.services.photo.element import ItemPhotoService
+from api.services.photo.author_list import ListAuthorPhotoService
+from api.services.photo.retrieve import RetrievePhotoService
 from api.services.photo.delete import DeletePhotoService
 from api.services.photo.update import UpdatePhotoService
 from api.services.photo.create import CreatePhotoService
+from utils.django_service_objects.service_objects.services import ServiceOutcome  # noqa: E501
+from api.docs.photo.create import parameters as create_parameters
+from api.docs.photo.delete import parameters as delete_parameters
+from api.docs.photo.list import parameters as list_parameters
+from api.docs.photo.author_list import parameters as author_list_parameters
+from api.docs.photo.retrieve import parameters as retrieve_parameters
+from api.docs.photo.update import parameters as update_parameters
+from drf_yasg.utils import swagger_auto_schema
 
 
-class PhotoUploadView(APIView):
+class UploadPhotoView(APIView):
     permission_classes = [IsAuthenticated]
     parser_classes = (MultiPartParser, FormParser)
 
+    @swagger_auto_schema(**create_parameters)
     def post(self, request):
-        service = CreatePhotoService(data=request.data)
-        photo = service.process(author=self.request.user)
-        print(photo.__dict__)
-        try:
-            serializer = PhotoSerializer(photo)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        except Exception as e:
-            ValueError("Ошибка обработки фотографии:", e)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        outcome = ServiceOutcome(
+            CreatePhotoService,
+            {**request.data.dict(), "author_id": request.user.id}
+        )
+        return Response(
+            PhotoSerializer(outcome.result).data,
+            status=status.HTTP_201_CREATED
+        )
 
 
-class PhotoListPublicView(APIView):
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.service = ListPhotoService()
-
-    def get_queryset(self):
-        search = self.request.GET.get('search', '')
-        sort = self.request.GET.get('sort', 'title')
-        print(search, sort)
-        photos = self.service.process(search=search, sort=sort)
-        if photos is None:
-            photos = []
-        return photos
-
+class ListPublicPhotoView(APIView):
+    @swagger_auto_schema(**list_parameters)
     def get(self, request):
-        try:
-            photos = self.get_queryset()
-            photos = list(photos)
-            serializer = PhotoSerializer(photos, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response(
-                {"error": str(e)}, status=status.HTTP_400_BAD_REQUEST
-            )
+        outcome = ServiceOutcome(ListPhotoService, request.GET.dict())
+        return Response({
+            "pagination": outcome.result['pagination'].to_json(),
+            "photos": PhotoSerializer(
+                outcome.result['photos'],
+                context={'user': request.user},
+                many=True).data
+            }, status=status.HTTP_200_OK)
 
 
-class PhotoListForAuthorView(APIView):
+class ListAuthorPhotoView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.service = ListPhotoService()
-
-    def get_queryset(self):
-        search = self.request.GET.get('search', '')
-        sort = self.request.GET.get('sort', 'publicated_at')
-        status = self.request.GET.get('status', 'public')
-        return self.service.process_for_author(
-                search=search,
-                sort=sort,
-                status=status,
-                author=self.request.user
-            )
-
+    @swagger_auto_schema(**author_list_parameters)
     def get(self, request):
-        try:
-            photos = self.get_queryset()
-            serializer = PhotoSerializer(photos, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response(
-                {"error": str(e)}, status=status.HTTP_400_BAD_REQUEST
-            )
+        data = {
+            **request.GET.dict(),
+            "author_id": request.user.id
+        }
+        outcome = ServiceOutcome(ListAuthorPhotoService, data)
+        return Response({
+            "pagination": outcome.result['pagination'].to_json(),
+            "photos": PhotoSerializer(
+                outcome.result['photos'], many=True).data
+            }, status=status.HTTP_200_OK)
 
 
-class PhotoItemView(APIView):
-    def get(self, request, photo_id):
-        service = ItemPhotoService(data={'photo_id': photo_id})
-        if service.is_valid():
-            photo = service.process()
-            serializer = PhotoSerializer(photo)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(service.errors, status=status.HTTP_400_BAD_REQUEST)
+class RetrievePhotoView(APIView):
+    @swagger_auto_schema(**retrieve_parameters)
+    def get(self, request, id):
+        outcome = ServiceOutcome(RetrievePhotoService,
+                                 {'id': id, "author_id": request.user.id})
+        return Response(
+            PhotoSerializer(
+                outcome.result,
+                context={'user': request.user}).data,
+            status=status.HTTP_200_OK)
 
 
-class PhotoUpdateView(APIView):
+class UpdatePhotoView(APIView):
+    permission_classes = [IsAuthenticated]
+    parser_classes = (MultiPartParser, FormParser)
+
+    @swagger_auto_schema(**update_parameters)
+    def put(self, request, id):
+        outcome = ServiceOutcome(
+            UpdatePhotoService,
+            {**request.data.dict(), "author_id": request.user.id, "id": id}
+        )
+        return Response(
+            PhotoSerializer(outcome.result).data,
+            status=status.HTTP_200_OK
+        )
+
+
+class DeletePhotoView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def put(self, request, photo_id):
-        service = UpdatePhotoService(data={**request.data,
-                                           'photo_id': photo_id})
-        if service.is_valid():
-            photo = service.process(author=request.user)
-            serializer = PhotoSerializer(photo)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(service.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class PhotoDeleteView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def delete(self, request, photo_id):
-        service = DeletePhotoService(data={'photo_id': photo_id})
-        if service.is_valid():
-            service.process(author=request.user)
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(service.errors, status=status.HTTP_400_BAD_REQUEST)
+    @swagger_auto_schema(**delete_parameters)
+    def delete(self, request, id):
+        ServiceOutcome(
+            DeletePhotoService,
+            {"author_id": request.user.id, "id": id}
+        )
+        return Response(status=status.HTTP_204_NO_CONTENT)

@@ -1,21 +1,37 @@
-from django.core.exceptions import ValidationError
 from models_app.models.comment.models import Comment
-from service_objects.services import Service
+from django import forms
+from utils.django_service_objects.service_objects.services import ServiceWithResult  # noqa: E501
+from django.contrib.auth.models import User
 
 
-class DeleteCommentService(Service):
-    class Meta:
-        model = Comment
-        fields = ['comment_id']
+class DeleteCommentService(ServiceWithResult):
+    id = forms.IntegerField()
+    author_id = forms.IntegerField()
 
-    def process(self, author=None):
+    custom_validations = ['validate_permission']
+
+    def process(self):
+        self.run_custom_validations()
+        if self.is_valid() and self._child_comment is None:
+            self.result = self._comment
+            self._comment.delete()
+        return self
+
+    @property
+    def _comment(self):
+        return Comment.objects.get(id=self.cleaned_data['id'])
+
+    @property
+    def _child_comment(self):
         try:
-            comment = Comment.objects.get(id=self.data['comment_id'])
-            if comment.author != author:
-                raise PermissionError(
-                    "У вас нет прав для удаления этого комментария."
-                )
-            comment.delete()
-            return comment
+            return Comment.objects.get(parent=self._comment)
         except Exception:
-            raise ValidationError("Ошибка удаления")
+            return None
+
+    @property
+    def _author(self):
+        return User.objects.get(id=self.cleaned_data['author_id'])
+
+    def validate_permission(self):
+        if self._author != self._comment.author:
+            PermissionError("Пользователь не имеет прав на удаление")

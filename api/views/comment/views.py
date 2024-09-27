@@ -1,83 +1,88 @@
 from rest_framework import status
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.parsers import FormParser
 from api.serializers.comment.serializers import CommentSerializer
 from rest_framework.permissions import IsAuthenticated
 from api.services.comment.list import ListCommentService
-from api.services.comment.element import ItemCommentService
+from api.services.comment.retrieve import RetrieveCommentService
 from api.services.comment.delete import DeleteCommentService
 from api.services.comment.update import UpdateCommentService
 from api.services.comment.create import CreateCommentService
+from utils.django_service_objects.service_objects.services import ServiceOutcome  # noqa: E501
+from drf_yasg.utils import swagger_auto_schema
+from api.docs.comment.create import parameters as create_parameters
+from api.docs.comment.delete import parameters as delete_parameters
+from api.docs.comment.list import parameters as list_parameters
+from api.docs.comment.retrieve import parameters as retrieve_parameters
+from api.docs.comment.update import parameters as update_parameters
 
 
-class CommentCreateView(APIView):
+class CreateCommentView(APIView):
     permission_classes = [IsAuthenticated]
+    parser_classes = (FormParser,)
 
+    @swagger_auto_schema(**create_parameters)
     def post(self, request):
-        service = CreateCommentService(data=request.data)
-        comment = service.process(author=self.request.user)
-        try:
-            serializer = CommentSerializer(comment)
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        except Exception as e:
-            ValueError("Ошибка создания комментария:", e)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        outcome = ServiceOutcome(
+            CreateCommentService,
+            {**request.data.dict(), "author_id": request.user.id}
+        )
+        return Response(
+            CommentSerializer(outcome.result).data,
+            status=status.HTTP_201_CREATED
+        )
 
 
-class CommentListView(APIView):
-
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        self.service = ListCommentService()
-
-    def get_queryset(self):
-        parent = self.request.GET.get('parent', None)
-        comments = self.service.process(parent=parent)
-        if comments is None:
-            comments = []
-        return comments
-
+class ListCommentView(APIView):
+    @swagger_auto_schema(**list_parameters)
     def get(self, request):
-        try:
-            comments = self.get_queryset()
-            comments = list(comments)
-            serializer = CommentSerializer(comments, many=True)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        except Exception as e:
-            return Response(
-                {"error": str(e)}, status=status.HTTP_400_BAD_REQUEST
-            )
+        outcome = ServiceOutcome(ListCommentService, request.GET.dict())
+        return Response(
+            CommentSerializer(
+                outcome.result,
+                context={'user': request.user},
+                many=True).data,
+            status=status.HTTP_200_OK
+        )
 
 
-class CommentItemView(APIView):
-    def get(self, request, comment_id):
-        service = ItemCommentService(data={'comment_id': comment_id})
-        if service.is_valid():
-            comment = service.process()
-            serializer = CommentSerializer(comment)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(service.errors, status=status.HTTP_400_BAD_REQUEST)
+class RetrieveCommentView(APIView):
+    @swagger_auto_schema(**retrieve_parameters)
+    def get(self, request, id):
+        outcome = ServiceOutcome(RetrieveCommentService,
+                                 {'id': id, "author_id": request.user.id})
+        return Response(
+            CommentSerializer(
+                outcome.result,
+                context={'user': request.user}).data,
+            status=status.HTTP_200_OK
+        )
 
 
-class CommentUpdateView(APIView):
+class UpdateCommentView(APIView):
+    permission_classes = [IsAuthenticated]
+    parser_classes = (FormParser,)
+
+    @swagger_auto_schema(**update_parameters)
+    def put(self, request, id):
+        outcome = ServiceOutcome(
+            UpdateCommentService,
+            {**request.data.dict(), "author_id": request.user.id, 'id': id}
+        )
+        return Response(
+            CommentSerializer(outcome.result).data,
+            status=status.HTTP_200_OK
+        )
+
+
+class DeleteCommentView(APIView):
     permission_classes = [IsAuthenticated]
 
-    def put(self, request, comment_id):
-        service = UpdateCommentService(data={**request.data,
-                                             'comment_id': comment_id})
-        if service.is_valid():
-            comment = service.process(author=request.user)
-            serializer = CommentSerializer(comment)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        return Response(service.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
-class CommentDeleteView(APIView):
-    permission_classes = [IsAuthenticated]
-
-    def delete(self, request, comment_id):
-        service = DeleteCommentService(data={'comment_id': comment_id})
-        if service.is_valid():
-            service.process(author=request.user)
-            return Response(status=status.HTTP_204_NO_CONTENT)
-        return Response(service.errors, status=status.HTTP_400_BAD_REQUEST)
+    @swagger_auto_schema(**delete_parameters)
+    def delete(self, request, id):
+        ServiceOutcome(
+            DeleteCommentService,
+            {"author_id": request.user.id, 'id': id}
+        )
+        return Response(status=status.HTTP_204_NO_CONTENT)
