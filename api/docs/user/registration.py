@@ -1,29 +1,14 @@
 from drf_yasg import openapi
 
-
-MANUAL_PARAMS = [
-    openapi.Parameter(
-        name='username',
-        in_=openapi.IN_BODY,
-        description='Username',
-        type=openapi.TYPE_STRING,
-        required=True,
-    ),
-    openapi.Parameter(
-        name='password',
-        in_=openapi.IN_BODY,
-        description='Password',
-        type=openapi.TYPE_STRING,
-        required=True,
-    ),
-    openapi.Parameter(
-        name='email',
-        in_=openapi.IN_BODY,
-        description='Email',
-        type=openapi.TYPE_STRING,
-        required=True,
-    ),
-]
+REQUEST_BODY = openapi.Schema(
+    type=openapi.TYPE_OBJECT,
+    required=['username', 'password', 'email'],
+    properties={
+        'username': openapi.Schema(type=openapi.TYPE_STRING),
+        'password': openapi.Schema(type=openapi.TYPE_STRING),
+        'email': openapi.Schema(type=openapi.TYPE_STRING),
+    }
+)
 
 RESPONSES = {
     "201": openapi.Response(
@@ -44,6 +29,6 @@ RESPONSES = {
 
 parameters = {
     "tags": ["User"],
-    "manual_parameters": MANUAL_PARAMS,
+    "request_body": REQUEST_BODY,
     "responses": RESPONSES,
 }

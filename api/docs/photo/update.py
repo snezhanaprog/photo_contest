@@ -4,25 +4,32 @@ from api.serializers.photo.serializers import PhotoSerializer
 
 MANUAL_PARAMS = [
     openapi.Parameter(
+        name="id",
+        in_=openapi.IN_PATH,
+        description="Photo id",
+        type=openapi.TYPE_INTEGER,
+        required=True,
+    ),
+    openapi.Parameter(
         name="title",
-        in_=openapi.IN_BODY,
+        in_=openapi.IN_FORM,
         description="Photo title",
         type=openapi.TYPE_STRING,
-        required=True,
+        required=False,
     ),
     openapi.Parameter(
         name="description",
-        in_=openapi.IN_BODY,
+        in_=openapi.IN_FORM,
         description="Photo description",
         type=openapi.TYPE_STRING,
-        required=True,
+        required=False,
     ),
     openapi.Parameter(
         name="image",
-        in_=openapi.IN_BODY,
+        in_=openapi.IN_FORM,
         description="Photo image data",
         type=openapi.TYPE_FILE,
-        required=True,
+        required=False,
     ),
 ]
 

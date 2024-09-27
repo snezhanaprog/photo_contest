@@ -5,21 +5,21 @@ from api.serializers.comment.serializers import CommentSerializer
 MANUAL_PARAMS = [
     openapi.Parameter(
         name="content",
-        in_=openapi.IN_BODY,
+        in_=openapi.IN_FORM,
         description="Content",
         type=openapi.TYPE_STRING,
         required=True,
     ),
     openapi.Parameter(
         name="photo_id",
-        in_=openapi.IN_BODY,
+        in_=openapi.IN_FORM,
         description="Photo id",
         type=openapi.TYPE_INTEGER,
         required=True,
     ),
     openapi.Parameter(
         name="parent",
-        in_=openapi.IN_BODY,
+        in_=openapi.IN_FORM,
         description="Parent comment id",
         type=openapi.TYPE_INTEGER,
         required=False,

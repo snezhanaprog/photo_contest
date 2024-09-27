@@ -12,14 +12,8 @@ RESPONSES = {
         schema=openapi.Schema(
             type=openapi.TYPE_OBJECT,
             properties={
-                'user': openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties=UserSerializer().fields,
-                ),
-                'profile': openapi.Schema(
-                    type=openapi.TYPE_OBJECT,
-                    properties=ProfileSerializer().fields,
-                ),
+                'user': UserSerializer().data,
+                'profile': ProfileSerializer().data,
             },
         ),
     ),

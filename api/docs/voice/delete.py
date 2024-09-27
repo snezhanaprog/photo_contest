@@ -1,15 +1,14 @@
 from drf_yasg import openapi
 
 
-MANUAL_PARAMS = [
-    openapi.Parameter(
-        name='photo_id',
-        in_=openapi.IN_BODY,
-        description='Photo id',
-        type=openapi.TYPE_INTEGER,
-        required=True,
-    ),
-]
+REQUEST_BODY = openapi.Schema(
+    type=openapi.TYPE_OBJECT,
+    required=['photo_id'],
+    properties={
+        'photo_id': openapi.Schema(type=openapi.TYPE_INTEGER)
+    }
+)
+
 
 RESPONSES = {
     "204": openapi.Response(
@@ -44,6 +43,6 @@ RESPONSES = {
 
 parameters = {
     "tags": ["Voice"],
-    "manual_parameters": MANUAL_PARAMS,
+    "request_body": REQUEST_BODY,
     "responses": RESPONSES,
 }

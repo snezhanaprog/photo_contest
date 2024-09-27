@@ -5,21 +5,21 @@ from api.serializers.photo.serializers import PhotoSerializer
 MANUAL_PARAMS = [
     openapi.Parameter(
         name="title",
-        in_=openapi.IN_BODY,
+        in_=openapi.IN_FORM,
         description="Photo title",
         type=openapi.TYPE_STRING,
         required=True,
     ),
     openapi.Parameter(
         name="description",
-        in_=openapi.IN_BODY,
+        in_=openapi.IN_FORM,
         description="Photo description",
         type=openapi.TYPE_STRING,
         required=True,
     ),
     openapi.Parameter(
         name="image",
-        in_=openapi.IN_BODY,
+        in_=openapi.IN_FORM,
         description="Photo image data",
         type=openapi.TYPE_FILE,
         required=True,

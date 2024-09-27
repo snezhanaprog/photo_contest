@@ -18,14 +18,14 @@ def get_comment_properties():
 MANUAL_PARAMS = [
     openapi.Parameter(
         name="photo_id",
-        in_=openapi.IN_BODY,
+        in_=openapi.IN_QUERY,
         description="Photo id",
         type=openapi.TYPE_INTEGER,
         required=True,
     ),
     openapi.Parameter(
         name="parent",
-        in_=openapi.IN_BODY,
+        in_=openapi.IN_QUERY,
         description="Parent comment id",
         type=openapi.TYPE_INTEGER,
         required=False,
@@ -39,7 +39,7 @@ RESPONSES = {
             type=openapi.TYPE_ARRAY,
             items=openapi.Schema(
                 type=openapi.TYPE_OBJECT,
-                properties=get_comment_properties(),
+                properties=None,
             ),
         ),
     ),

@@ -4,7 +4,7 @@ from drf_yasg import openapi
 MANUAL_PARAMS = [
     openapi.Parameter(
         name="avatar",
-        in_=openapi.IN_BODY,
+        in_=openapi.IN_FORM,
         description="Avatar image data",
         type=openapi.TYPE_FILE,
         required=True,

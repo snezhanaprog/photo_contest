@@ -1,9 +1,8 @@
 from drf_yasg import openapi
-from api.serializers.photo.serializers import PhotoSerializer
 
-
+"""
 def get_photo_properties():
-    photo_fields = PhotoSerializer().get_fields()
+    photo_fields = PhotoSerializer().fields
     properties = {}
 
     for field_name, field in photo_fields.items():
@@ -13,6 +12,7 @@ def get_photo_properties():
             example=field.default
         )
     return properties
+"""
 
 
 MANUAL_PARAMS = [
@@ -27,14 +27,7 @@ MANUAL_PARAMS = [
 
 RESPONSES = {
     "200": openapi.Response(
-        description="Success",
-        schema=openapi.Schema(
-            type=openapi.TYPE_ARRAY,
-            items=openapi.Schema(
-                type=openapi.TYPE_OBJECT,
-                properties=get_photo_properties(),
-            ),
-        ),
+        description="Success"
     ),
     "401": openapi.Response(
         description="Unauthorized",
