@@ -80,7 +80,7 @@ class RetrievePhotoView(APIView):
 
 class UpdatePhotoView(APIView):
     permission_classes = [IsAuthenticated]
-    parser_classes = (MultiPartParser, FormParser)
+    parser_classes = (MultiPartParser, FormParser, )
 
     @swagger_auto_schema(**update_parameters)
     def put(self, request, id):
