@@ -25,7 +25,7 @@ urlpatterns = [
     path('upload-photo/', UploadPhotoView.as_view(), name='upload-photo'),
     path('delete-photo/<int:id>/', DeletePhotoView.as_view(),
          name="delete-photo"),
-    path('update-photo/<int:id>', UpdatePhotoView.as_view(),
+    path('update-photo/<int:id>/', UpdatePhotoView.as_view(),
          name='update-photo'),
 
     path('delete-voice/', DeleteVoiceView.as_view(), name="delete-voice"),
@@ -37,7 +37,7 @@ urlpatterns = [
          name='create-comment'),
     path('delete-comment/<int:id>/', DeleteCommentView.as_view(),
          name="delete-comment"),
-    path('update-comment/<int:id>', UpdateCommentView.as_view(),
+    path('update-comment/<int:id>/', UpdateCommentView.as_view(),
          name='update-comment'),
 ]
 
