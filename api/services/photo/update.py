@@ -62,8 +62,8 @@ class UpdatePhotoService(ServiceWithResult):
             self.add_error(
                 "id",
                 NotFound(
-                    message=f"Not found user with id = {
-                        self.cleaned_data['author_id']}"
+                    message="Not found user with id = " +
+                    self.cleaned_data['author_id']
                 ),
             )
 
@@ -72,7 +72,7 @@ class UpdatePhotoService(ServiceWithResult):
             self.add_error(
                 "id",
                 NotFound(
-                    message=f"Not found photo with id = {
-                        self.cleaned_data['id']}"
+                    message="Not found photo with id = " +
+                    self.cleaned_data['id']
                 ),
             )

@@ -37,7 +37,6 @@ class ListAuthorPhotoService(ServiceWithResult):
     def pagination_photos(self):
         per_page = self.cleaned_data.get('per_page') or 3
         current_page = self.cleaned_data['current_page'] or 1
-
         paginator = Paginator(self._photos, per_page)
         photos_page = paginator.get_page(current_page)
         pagination = CustomPagination(photos_page, current_page, per_page)
@@ -52,7 +51,7 @@ class ListAuthorPhotoService(ServiceWithResult):
             self.add_error(
                 "id",
                 NotFound(
-                    message=f"Not found user with id = {
-                        self.cleaned_data['author_id']}"
+                    message="Not found user with id = " +
+                    self.cleaned_data['author_id']
                 ),
             )

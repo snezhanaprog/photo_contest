@@ -32,20 +32,16 @@ class RetrieveUserService(ServiceWithResult):
 
     def validate_presence_user(self):
         if not self._user:
+            msg = f"Not found user with id = {self.cleaned_data['id']}"
             self.add_error(
                 "id",
-                NotFound(
-                    message=f"Not found user with id = {
-                        self.cleaned_data['id']}"
-                ),
+                NotFound(message=msg),
             )
 
     def validate_presence_profile(self):
         if not self._profile:
+            msg = f"Not found profile with userid = {self.cleaned_data['id']}"
             self.add_error(
                 "id",
-                NotFound(
-                    message=f"Not found profile with user id = {
-                        self.cleaned_data['id']}"
-                ),
+                NotFound(message=msg),
             )
