@@ -9,3 +9,7 @@ utils/
 models_app/migrations
 conf/media
 utils
+.DS_Store
+api/.DS_Store
+conf/.DS_Store
+models_app/.DS_Store
