@@ -10,3 +10,4 @@ class ModelsAppConfig(AppConfig):
         from .models.voice.signals import voice_pre_delete  # noqa: F401
         from .models.comment.signals import comment_post_save  # noqa: F401
         from .models.comment.signals import comment_pre_delete  # noqa: F401
+        from .models.photo.signals import photo_post_save  # noqa: F401

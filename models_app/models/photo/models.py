@@ -12,6 +12,7 @@ class Photo(BaseModel):
         ('private', 'На модерации'),
         ('deleted', 'На удалении'),
         ('public', 'Одобрено'),
+        ('block', 'Отклонено'),
     ]
 
     title = models.CharField(max_length=100)
