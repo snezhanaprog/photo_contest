@@ -47,10 +47,12 @@ INSTALLED_APPS = [
     'rest_framework_swagger',
     'service_objects',
     'adrf',
-    'utils',
+    'utils.apps.UtilsConfig',
     'drf_yasg',
     'decouple',
-    'celery'
+    'celery',
+    'channels',
+    'notifications',
 ]
 
 MIDDLEWARE = [
@@ -83,7 +85,11 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'conf.wsgi.application'
+ASGI_APPLICATION = 'conf.asgi.application'
 
+CHANNEL_LAYERS = {
+    "default": {"BACKEND": "channels.layers.InMemoryChannelLayer"}
+}
 
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
