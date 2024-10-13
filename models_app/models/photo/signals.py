@@ -6,7 +6,7 @@ from notifications.consumers import notify_user
 
 @receiver(post_save, sender=Photo)
 def photo_post_save(sender, instance, created, **kwargs):
-    if not created:
+    if not hasattr(instance, 'change_counters'):
         if instance.status == "private":
             notify_user(
                 instance.author,
@@ -14,3 +14,6 @@ def photo_post_save(sender, instance, created, **kwargs):
         if instance.status == "public":
             notify_user(instance.author,
                         f'Ваша фотография {instance.title} одобрена!')
+        if instance.status == "block":
+            notify_user(instance.author,
+                        f'Ваша фотография {instance.title} отклонена!')

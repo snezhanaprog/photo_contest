@@ -9,6 +9,7 @@ def comment_post_save(sender, instance, created, **kwargs):
     if created:
         photo = instance.associated_photo
         photo.count_comments += 1
+        photo.change_counters = True
         photo.save()
         notify_user(
             instance.author,
@@ -23,6 +24,7 @@ def comment_pre_delete(sender, instance, **kwargs):
     photo = instance.associated_photo
     if photo:
         photo.count_comments -= 1
+        photo.change_counters = True
         photo.save()
         notify_user(
             instance.author,

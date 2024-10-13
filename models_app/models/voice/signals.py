@@ -9,6 +9,7 @@ def voice_post_save(sender, instance, created, **kwargs):
     if created:
         photo = instance.associated_photo
         photo.count_voices += 1
+        photo.change_counters = True
         photo.save()
         notify_user(
             instance.author,
@@ -21,8 +22,10 @@ def voice_post_save(sender, instance, created, **kwargs):
 @receiver(pre_delete, sender=Voice)
 def voice_pre_delete(sender, instance, **kwargs):
     photo = instance.associated_photo
+    print("hey")
     if photo:
         photo.count_voices -= 1
+        photo.change_counters = True
         photo.save()
         notify_user(
             instance.author,
