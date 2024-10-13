@@ -50,6 +50,7 @@ INSTALLED_APPS = [
     'utils.apps.UtilsConfig',
     'drf_yasg',
     'decouple',
+    'django_celery_beat',
     'celery',
     'channels',
     'notifications',
