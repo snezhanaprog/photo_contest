@@ -5,6 +5,7 @@ from rest_framework.test import APIClient
 from django.test import TestCase
 from models_app.factories.photo import PhotoFactory
 from models_app.factories.user import UserFactory
+from models_app.tasks.tasks import delete_photos
 
 
 class UploadPhotoViewTest(TestCase):
@@ -192,3 +193,18 @@ class RetrievePhotoViewTest(TestCase):
     def test_retrieve_non_existing_comment(self):
         response = self.client.get('/api/photo/999/')
         self.assertEqual(response.status_code, 404)
+
+
+class CeleryDeleteTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):
+        cls.photo1 = PhotoFactory(status="deleted")
+        cls.photo2 = PhotoFactory(status="public")
+        cls.client = APIClient()
+
+    def test_delete_photos(self):
+        delete_photos()
+        response = self.client.get(f'/api/photo/{self.photo1.id}/')
+        self.assertEqual(response.status_code, 404)
+        response = self.client.get(f'/api/photo/{self.photo2.id}/')
+        self.assertEqual(response.status_code, 200)
