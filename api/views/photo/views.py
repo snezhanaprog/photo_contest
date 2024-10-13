@@ -7,9 +7,10 @@ from rest_framework.permissions import IsAuthenticated
 from api.services.photo.list import ListPhotoService
 from api.services.photo.author_list import ListAuthorPhotoService
 from api.services.photo.retrieve import RetrievePhotoService
-from api.services.photo.delete import DeletePhotoService
+from api.services.photo.cancel_delete import CancelDeletePhoto
 from api.services.photo.update import UpdatePhotoService
 from api.services.photo.create import CreatePhotoService
+from api.services.photo.delete import DeletePhotoService
 from utils.django_service_objects.service_objects.services import ServiceOutcome  # noqa: E501
 from api.docs.photo.create import parameters as create_parameters
 from api.docs.photo.delete import parameters as delete_parameters
@@ -62,8 +63,10 @@ class ListAuthorPhotoView(APIView):
         return Response({
             "pagination": outcome.result['pagination'].to_json(),
             "photos": PhotoSerializer(
-                outcome.result['photos'], many=True).data
-            }, status=status.HTTP_200_OK)
+                outcome.result['photos'],
+                context={'user': request.user},
+                many=True).data},
+            status=status.HTTP_200_OK)
 
 
 class RetrievePhotoView(APIView):
@@ -104,3 +107,14 @@ class DeletePhotoView(APIView):
             {"author_id": request.user.id, "id": id}
         )
         return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class RecoverPhotoView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request, id):
+        ServiceOutcome(
+            CancelDeletePhoto,
+            {"author_id": request.user.id, "id": id}
+        )
+        return Response(status=status.HTTP_200_OK)
