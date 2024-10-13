@@ -6,6 +6,7 @@ from django.contrib.auth.models import User
 
 class PhotoSerializer(serializers.ModelSerializer):
     is_liked = serializers.SerializerMethodField()
+    is_change = serializers.SerializerMethodField()
 
     class Meta:
         model = Photo
@@ -29,3 +30,9 @@ class PhotoSerializer(serializers.ModelSerializer):
         author_obj = User.objects.get(id=repr['author'])
         repr['author'] = author_obj.username
         return repr
+
+    def get_is_change(self, obj):
+        user = self.context.get("user")
+        if user and user.id == obj.author.id:
+            return True
+        return False
