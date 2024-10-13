@@ -2,11 +2,10 @@ from models_app.models.photo.models import Photo
 from django import forms
 from utils.django_service_objects.service_objects.services import ServiceWithResult  # noqa: E501
 from utils.django_service_objects.service_objects.errors import ForbiddenError  # noqa: E501
-from django.contrib.auth.models import User
 from utils.django_service_objects.service_objects.errors import NotFound
 
 
-class DeletePhotoService(ServiceWithResult):
+class CancelDeletePhoto(ServiceWithResult):
     id = forms.IntegerField()
     author_id = forms.IntegerField()
 
@@ -17,24 +16,17 @@ class DeletePhotoService(ServiceWithResult):
     ]
 
     def process(self):
-        self.run_custom_validations()
-        if self.is_valid():
-            self.result = self._delete()
+        self.change_status_private()
         return self
-
-    def _delete(self):
-        obj = self._photo
-        obj.status = "deleted"
-        obj.save()
-        return obj
 
     @property
     def _photo(self):
         return Photo.objects.get(id=self.cleaned_data['id'])
 
-    @property
-    def _author(self):
-        return User.objects.get(id=self.cleaned_data['author_id'])
+    def change_status_private(self):
+        photo = self._photo
+        photo.status = "private"
+        photo.save()
 
     def validate_permission(self):
         if self._author != self._photo.author:
