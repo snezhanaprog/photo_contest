@@ -7,6 +7,7 @@ from urllib.parse import parse_qs
 
 
 def notify_user(user, message):
+    print(message)
     channel_layer = get_channel_layer()
     async_to_sync(channel_layer.group_send)(
         f"user_{user.id}",
@@ -21,6 +22,12 @@ def notify_user(user, message):
 
 
 class NotificationConsumer(AsyncWebsocketConsumer):
+    online_users = []
+
+    async def add_online_user(self, user):
+        if user not in self.online_users:
+            self.online_users.append(user)
+
     async def connect(self):
         from rest_framework.authtoken.models import Token
         query_string = self.scope['query_string'].decode('utf-8')
@@ -29,6 +36,10 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         if key:
             token = await Token.objects.select_related('user').aget(key=key)
             self.user = token.user
+            if self.user in self.online_users:
+                await self.close()
+            else:
+                self.add_online_user(self.user)
         else:
             await self.close()
         self.group_name = f"user_{self.user.id}"
@@ -36,6 +47,8 @@ class NotificationConsumer(AsyncWebsocketConsumer):
         await self.accept()
 
     async def disconnect(self, close_code):
+        if self.user in self.online_users:
+            self.online_users.remove(self.user)
         await self.channel_layer.group_discard(
             self.group_name,
             self.channel_name
@@ -43,4 +56,5 @@ class NotificationConsumer(AsyncWebsocketConsumer):
 
     async def send_notification(self, event):
         notification = event['notification']
+        print("not", notification)
         await self.send(text_data=json.dumps(notification))
