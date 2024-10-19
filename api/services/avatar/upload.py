@@ -45,12 +45,10 @@ class UploadAvatarService(ServiceWithResult):
 
     def validate_presence_user(self):
         if not self._user:
+            msg = f"Not found user with id = {self.cleaned_data['user_id']}"
             self.add_error(
                 "id",
-                NotFound(
-                    message=f"Not found user with id = {
-                        self.cleaned_data['user_id']}"
-                ),
+                NotFound(message=msg),
             )
 
     def validate_presence_profile(self):
@@ -58,7 +56,7 @@ class UploadAvatarService(ServiceWithResult):
             self.add_error(
                 "id",
                 NotFound(
-                    message=f"Not found profile with user id = {
-                        self.cleaned_data['user_id']}"
+                    message="Not found profile with user id = " +
+                    self.cleaned_data['user_id']
                 ),
             )

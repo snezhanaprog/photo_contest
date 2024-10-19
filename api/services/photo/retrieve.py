@@ -24,7 +24,7 @@ class RetrievePhotoService(ServiceWithResult):
             self.add_error(
                 "id",
                 NotFound(
-                    message=f"Not found photo with id = {
-                        self.cleaned_data['id']}"
+                    message="Not found photo with id = " +
+                    self.cleaned_data['id']
                 ),
             )

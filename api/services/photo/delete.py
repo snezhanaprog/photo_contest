@@ -19,9 +19,14 @@ class DeletePhotoService(ServiceWithResult):
     def process(self):
         self.run_custom_validations()
         if self.is_valid():
-            self.result = self._photo
-            self._photo.delete()
+            self.result = self._delete()
         return self
+
+    def _delete(self):
+        obj = self._photo
+        obj.status = "deleted"
+        obj.save()
+        return obj
 
     @property
     def _photo(self):
@@ -40,8 +45,8 @@ class DeletePhotoService(ServiceWithResult):
             self.add_error(
                 "id",
                 NotFound(
-                    message=f"Not found user with id = {
-                        self.cleaned_data['author_id']}"
+                    message="Not found user with id = " +
+                    self.cleaned_data['author_id']
                 ),
             )
 
@@ -50,7 +55,7 @@ class DeletePhotoService(ServiceWithResult):
             self.add_error(
                 "id",
                 NotFound(
-                    message=f"Not found photo with id = {
-                        self.cleaned_data['id']}"
+                    message="Not found photo with id = " +
+                    self.cleaned_data['id']
                 ),
             )

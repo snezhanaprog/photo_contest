@@ -1,15 +1,18 @@
 from django.urls import path
 from django.conf import settings
 from django.conf.urls.static import static
-from .views.user.views import UserProfileView, RegisterView, LoginView
-from .views.user.views import UploadAvatarView
-from .views.photo.views import ListPublicPhotoView, ListAuthorPhotoView
-from .views.photo.views import RetrievePhotoView, UploadPhotoView
-from .views.photo.views import UpdatePhotoView, DeletePhotoView
+from .views.user.views import (
+    UserProfileView, RegisterView, LoginView, UploadAvatarView)
+
+from .views.photo.views import (
+    ListAuthorPhotoView, ListPublicPhotoView, RetrievePhotoView,
+    UpdatePhotoView, UploadPhotoView, DeletePhotoView, RecoverPhotoView)
+
+from .views.comment.views import (
+    ListCommentView, RetrieveCommentView, CreateCommentView,
+    UpdateCommentView, DeleteCommentView)
+
 from .views.voice.views import CreateVoiceView, DeleteVoiceView
-from .views.comment.views import ListCommentView, RetrieveCommentView
-from .views.comment.views import CreateCommentView
-from .views.comment.views import DeleteCommentView, UpdateCommentView
 
 urlpatterns = [
     path('login/', LoginView.as_view(), name='login'),
@@ -25,7 +28,9 @@ urlpatterns = [
     path('upload-photo/', UploadPhotoView.as_view(), name='upload-photo'),
     path('delete-photo/<int:id>/', DeletePhotoView.as_view(),
          name="delete-photo"),
-    path('update-photo/<int:id>', UpdatePhotoView.as_view(),
+    path('recover-photo/<int:id>/', RecoverPhotoView.as_view(),
+         name="recover-photo"),
+    path('update-photo/<int:id>/', UpdatePhotoView.as_view(),
          name='update-photo'),
 
     path('delete-voice/', DeleteVoiceView.as_view(), name="delete-voice"),
@@ -37,7 +42,7 @@ urlpatterns = [
          name='create-comment'),
     path('delete-comment/<int:id>/', DeleteCommentView.as_view(),
          name="delete-comment"),
-    path('update-comment/<int:id>', UpdateCommentView.as_view(),
+    path('update-comment/<int:id>/', UpdateCommentView.as_view(),
          name='update-comment'),
 ]
 
